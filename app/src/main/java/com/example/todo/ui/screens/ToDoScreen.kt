@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -14,26 +14,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.todo.data.TodoItem
+import com.example.todo.ui.viewmodel.TodoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// CHANGE 1: The function signature is updated.
+// It now accepts the ViewModel as the single source of state and logic,
+// instead of receiving 'userName' and 'todoItems' directly.
 fun TodoScreen(
-    userName: String,
-    todoItems: MutableList<TodoItem>,
+    viewModel: TodoViewModel,
     onNavigateToDetail: (Int) -> Unit
 ) {
+    // CHANGE 2: We collect the UI state from the ViewModel.
+    // The `collectAsState()` function subscribes this Composable to the ViewModel's StateFlow.
+    // Whenever the uiState in the ViewModel changes, this Composable will automatically recompose.
+    val uiState by viewModel.uiState.collectAsState()
+
+    // These states are purely for controlling the UI elements within this screen
+    // and don't need to be in the ViewModel.
     var text by rememberSaveable { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf("") }
     val context = LocalContext.current
 
+    // The filtering logic now uses the list from the collected uiState.
     val filteredItems = if (searchQuery.isBlank()) {
-        todoItems
+        uiState.items
     } else {
-        todoItems.filter { it.task.contains(searchQuery, ignoreCase = true) }
+        uiState.items.filter { it.task.contains(searchQuery, ignoreCase = true) }
     }
 
     Scaffold(
@@ -55,12 +65,11 @@ fun TodoScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     IconButton(
                         onClick = {
-                            if (text.isNotBlank()) {
-                                val newTodo = TodoItem(System.currentTimeMillis().toInt(), text)
-                                todoItems.add(0, newTodo)
-                                text = ""
-                                searchQuery = ""
-                            }
+                            // CHANGE 3: Instead of modifying a list directly, we send an "event"
+                            // to the ViewModel, telling it our intent to add a new todo.
+                            viewModel.addTodo(text)
+                            // The UI resets its own temporary state.
+                            text = ""
                         },
                         modifier = Modifier.size(48.dp),
                         colors = IconButtonDefaults.iconButtonColors(
@@ -83,8 +92,9 @@ fun TodoScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
+            // The user's name is now sourced from the uiState object.
             Text(
-                text = "$userName's To-Do List",
+                text = "${uiState.userName}'s To-Do List",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
@@ -106,14 +116,15 @@ fun TodoScreen(
                         item = item,
                         onItemClick = { onNavigateToDetail(item.id) },
                         onItemChecked = { isChecked ->
-                            val index = todoItems.indexOf(item)
-                            if (index >= 0) {
-                                todoItems[index] = item.copy(isCompleted = isChecked)
-                                if (isChecked) {
-                                    val remainingTasks = todoItems.count { !it.isCompleted }
-                                    val message = "One Down : $remainingTasks to go!"
-                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                                }
+                            // CHANGE 4: Send another "event" to the ViewModel.
+                            // The ViewModel will handle the logic for toggling the item's status.
+                            viewModel.toggleCompleted(item)
+
+                            // The Toast logic can remain, but it also gets its data from the single source of truth.
+                            if (isChecked) {
+                                val remainingTasks = (uiState.items.count { !it.isCompleted }) -1
+                                val message = "One Down : $remainingTasks to go!"
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                             }
                         }
                     )
@@ -156,10 +167,4 @@ fun TodoItemRow(
                 .padding(horizontal = 8.dp)
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    TodoScreen(userName = "Android", todoItems = mutableListOf(), onNavigateToDetail = {})
 }
