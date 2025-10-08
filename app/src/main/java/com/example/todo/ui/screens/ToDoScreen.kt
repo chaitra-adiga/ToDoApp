@@ -31,13 +31,13 @@ fun TodoScreen(
     // CHANGE 2: We collect the UI state from the ViewModel.
     // The `collectAsState()` function subscribes this Composable to the ViewModel's StateFlow.
     // Whenever the uiState in the ViewModel changes, this Composable will automatically recompose.
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState() //d
 
     // These states are purely for controlling the UI elements within this screen
     // and don't need to be in the ViewModel.
     var text by rememberSaveable { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf("") }
-    val context = LocalContext.current
+    val context = LocalContext.current //d
 
     // The filtering logic now uses the list from the collected uiState.
     val filteredItems = if (searchQuery.isBlank()) {
@@ -46,14 +46,14 @@ fun TodoScreen(
         uiState.items.filter { it.task.contains(searchQuery, ignoreCase = true) }
     }
 
-    Scaffold(
+    Scaffold(//d
         bottomBar = {
             Surface(modifier = Modifier.fillMaxWidth(), shadowElevation = 8.dp) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.SpaceBetween, //d
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedTextField(
@@ -66,7 +66,7 @@ fun TodoScreen(
                     IconButton(
                         onClick = {
                             // CHANGE 3: Instead of modifying a list directly, we send an "event"
-                            // to the ViewModel, telling it our intent to add a new todo.
+                            // to the ViewModel, telling it our intent to add a new todo. //d
                             viewModel.addTodo(text)
                             // The UI resets its own temporary state.
                             text = ""
@@ -74,7 +74,7 @@ fun TodoScreen(
                         modifier = Modifier.size(48.dp),
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+                            contentColor = MaterialTheme.colorScheme.onPrimary //d
                         )
                     ) {
                         Icon(
@@ -92,7 +92,7 @@ fun TodoScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            // The user's name is now sourced from the uiState object.
+            // The user's name is now sourced from the //uiState// object.
             Text(
                 text = "${uiState.userName}'s To-Do List",
                 fontSize = 22.sp,
@@ -141,7 +141,7 @@ fun TodoItemRow(
     onItemChecked: (Boolean) -> Unit
 ) {
     var lastClickTime by remember { mutableLongStateOf(0L) }
-    val debounceInterval = 500L
+    val debounceInterval = 500L //d
 
     Row(
         modifier = Modifier

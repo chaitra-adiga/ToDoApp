@@ -4,7 +4,7 @@ class ToDoRepository {
     private val _todoItems= mutableListOf<TodoItem>()
     /*gettodo  gettodoby Id update todo delete todo toggletodocomplete*/
     fun getTodos(): List<TodoItem>{
-        return _todoItems.toList().sortedByDescending { it.id } //returning a new list
+        return _todoItems.toList() //returning a new list
     }
 
     fun getTodoById(id: Int) : TodoItem? { //it could be null as well
@@ -21,6 +21,7 @@ class ToDoRepository {
         if(itemIndex != -1){
             val originalItem = _todoItems[itemIndex]
             val updatedItem = originalItem.copy(task=newTask)
+            //val latestIndex= _todoItems.size-1
             _todoItems.removeAt(itemIndex)
             _todoItems.add(0, updatedItem)
         }

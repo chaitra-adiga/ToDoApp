@@ -36,7 +36,7 @@ fun AppNavigation() {
                 onNavigateToTodo = { name ->
                     todoViewModel.setUserName(name) // Send event to ViewModel
                     navController.navigate(AppRoutes.TODO_SCREEN) {
-                        popUpTo(AppRoutes.WELCOME_SCREEN) { inclusive = true }
+                        popUpTo(AppRoutes.WELCOME_SCREEN) { inclusive = true } //d
                     }
                 }
             )

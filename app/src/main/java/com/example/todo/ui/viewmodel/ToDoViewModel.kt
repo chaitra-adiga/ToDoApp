@@ -36,7 +36,7 @@ class TodoViewModel : ViewModel() {
         }
     }
 
-    // This function is an "event" triggered by the UI.
+    // This function is an "event" triggered by the UI for onboarding screen
     fun setUserName(name: String) {
         _uiState.update { it.copy(userName = name) }
     }

@@ -19,7 +19,7 @@ import com.example.todo.data.TodoItem
 @Composable
 fun TodoDetailScreen(
     item: TodoItem,
-    onNavigateBack: () -> Unit,
+    onNavigateBack: () -> Unit, //debounce impl.
     onSave: (id: Int, newTask: String) -> Unit,
     onDelete: (id: Int) -> Unit
 ) {
