@@ -21,7 +21,6 @@ class ToDoRepository {
         if(itemIndex != -1){
             val originalItem = _todoItems[itemIndex]
             val updatedItem = originalItem.copy(task=newTask)
-            //val latestIndex= _todoItems.size-1
             _todoItems.removeAt(itemIndex)
             _todoItems.add(0, updatedItem)
         }
