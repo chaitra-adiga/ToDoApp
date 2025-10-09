@@ -25,13 +25,21 @@ fun TodoDetailScreen(
 ) {
     var isEditing by remember { mutableStateOf(false) }
     var editedTask by remember { mutableStateOf(item.task) }
+    var lastClickTime  by remember { mutableLongStateOf(0L) }
+    val debounceInterval = 1000L
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(if (isEditing) "Edit Task" else "Task Details") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        val currentTime = System.currentTimeMillis()
+                        if (currentTime - lastClickTime > debounceInterval) {
+                            lastClickTime = currentTime
+                            onNavigateBack()
+                        }
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
